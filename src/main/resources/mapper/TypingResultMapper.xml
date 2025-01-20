@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.program.typingpractice.mapper.TypingResultMapper">
+
+    <insert id="insertTypingResult" parameterType="com.program.typingpractice.model.TypingResult">
+        INSERT INTO typing_results (user_input, correct_input, accuracy, time_taken)
+        VALUES (#{userInput}, #{correctInput}, #{accuracy}, #{timeTaken})
+    </insert>
+
+    <select id="getAllResults" resultType="com.program.typingpractice.model.TypingResult">
+        SELECT * FROM typing_results ORDER BY created_at DESC
+    </select>
+
+</mapper>
