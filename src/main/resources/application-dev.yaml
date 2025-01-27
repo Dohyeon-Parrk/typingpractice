@@ -1,0 +1,34 @@
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 250MB
+      max-request-size: 20MB
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
+cloud:
+  aws:
+    stack:
+      auto: false
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: typingpractice
+    credentials:
+      accessKey:
+      secretKey:
+
+jwt:
+  token:
+    secret:
+      key: a2ltd2FueW91bmdTZWNyZXRLZXlTcHJpbmdYXRhSnBh
+    expires:
+      in: 1800000
+
+filePath:
+  cafe: hello
