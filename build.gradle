@@ -24,6 +24,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation' // Validation
 	implementation 'org.springframework.boot:spring-boot-starter-web' // Web Starter
 
+	// SpringSecurity
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
 	// Lombok
 	implementation 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
