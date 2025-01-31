@@ -3,6 +3,7 @@ package com.program.typingpractice.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,7 +13,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.program.typingpractice.repository.user.UserRepository;
 import com.program.typingpractice.service.user.CustomUserDetailsService;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
 	@Bean
@@ -20,17 +25,16 @@ public class SecurityConfig {
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/", "/login", "/register").permitAll()
-				.requestMatchers("/admin/**").hasRole("ADMIN")
+				.requestMatchers("/api/auth/**").permitAll()
 				.anyRequest().authenticated()
 			)
 			.formLogin(form -> form
-				.loginPage("/login")
-				.defaultSuccessUrl("/home", true)
+				.loginProcessingUrl("/api/auth/login")
+				.defaultSuccessUrl("/", true)
 				.permitAll()
 			)
 			.logout(logout -> logout
-				.logoutUrl("/logout")
+				.logoutUrl("/api/auth/logout")
 				.logoutSuccessUrl("/")
 				.invalidateHttpSession(true)
 				.deleteCookies("JSESSIONID")

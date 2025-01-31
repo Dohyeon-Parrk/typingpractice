@@ -3,7 +3,6 @@ package com.program.typingpractice.service.user;
 import com.program.typingpractice.domain.user.User;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
