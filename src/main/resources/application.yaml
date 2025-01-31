@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: typingpractice
-  profiles:
-    include:
-      - dev
-      - oauth2
