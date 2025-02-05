@@ -13,13 +13,14 @@ import jakarta.persistence.Table;
 
 import java.util.Set;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
 public class User {
 
