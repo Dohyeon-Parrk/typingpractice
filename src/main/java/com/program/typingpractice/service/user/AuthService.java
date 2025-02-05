@@ -27,7 +27,12 @@ public class AuthService {
 			throw new IllegalArgumentException("Username is already in use");
 		}
 
+		if(userRepository.findByEmail(requestDto.getEmail()).isPresent()){
+			throw new IllegalArgumentException("Email is already in use");
+		}
+
 		User user = User.builder()
+				.email(requestDto.getEmail())
 				.username(requestDto.getUsername())
 				.password(passwordEncoder.encode(requestDto.getPassword()))
 				.roles(Set.of("ROLE_USER"))
@@ -38,8 +43,8 @@ public class AuthService {
 	}
 
 	public String login(LoginRequestDto requestDto, HttpSession session) {
-		User user = userRepository.findByUsername(requestDto.getUsername())
-				.orElseThrow(() -> new IllegalArgumentException("Username is already in use"));
+		User user = userRepository.findByEmail(requestDto.getEmail())
+				.orElseThrow(() -> new IllegalArgumentException("Email is already in use"));
 
 		if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
 			throw new IllegalArgumentException("Wrong password");
