@@ -29,6 +29,9 @@ public class User {
 	private Long id;
 
 	@Column(nullable = false, unique = true)
+	private String email;
+
+	@Column(nullable = false, unique = true)
 	private String username;
 
 	@Column(nullable = false)
@@ -40,7 +43,8 @@ public class User {
 	private Set<String> roles;
 
 	@Builder
-	public User(String username, String password, Set<String> roles) {
+	public User(String email, String username, String password, Set<String> roles) {
+		this.email = email;
 		this.username = username;
 		this.password = password;
 		this.roles = roles;
