@@ -3,13 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve --port 3000",
+    "build": "vue-cli-service build --watch",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "axios": "^1.7.7",
+    "bootstrap": "^5.3.3",
+    "bootstrap-vue-3": "^0.5.1",
     "core-js": "^3.8.3",
+    "devextreme": "^24.2.3",
+    "devextreme-vue": "^24.2.3",
+    "jenesius-vue-modal": "^1.11.9",
+    "node-sass": "^9.0.0",
+    "pinia": "^2.3.1",
+    "sass-loader": "^16.0.4",
+    "volar": "^0.0.2",
     "vue": "^3.2.13",
     "vue-router": "^4.4.3"
   },
