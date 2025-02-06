@@ -1,12 +1,14 @@
 package com.program.typingpractice.controller.user;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.program.typingpractice.dto.user.response.LoginResponseDto;
+import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import com.program.typingpractice.dto.user.RegisterRequestDto;
-import com.program.typingpractice.dto.user.LoginRequestDto;
+import com.program.typingpractice.dto.user.request.RegisterRequestDto;
+import com.program.typingpractice.dto.user.request.LoginRequestDto;
 import com.program.typingpractice.service.user.AuthService;
 
 import jakarta.servlet.http.HttpSession;
@@ -20,17 +22,34 @@ public class AuthController {
 	private final AuthService authService;
 
 	@PostMapping("/register")
-	public String register(@RequestBody RegisterRequestDto requestDto) {
-		return authService.register(requestDto);
+	public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto requestDto) {
+		authService.register(requestDto);
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body("회원가입 완료");
+	}
+
+	@PostMapping("/register/admin")
+	public ResponseEntity<String> registerAdmin(@Valid @RequestBody RegisterAdminRequestDto requestDto) {
+		authService.registerAdmin(requestDto);
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body("관리자 등록 완료");
 	}
 
 	@PostMapping("/login")
-	public String login(@RequestBody LoginRequestDto requestDto, HttpSession session){
-		return authService.login(requestDto, session);
+	public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto, HttpSession session){
+		LoginResponseDto responseDto = authService.login(requestDto, session);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(responseDto);
 	}
 
-	@PostMapping("/logout")
-	public String logout(HttpSession session){
-		return authService.logout(session);
+	@GetMapping("/logout/{userId}")
+	public ResponseEntity<Void> logout(HttpSession session){
+		authService.logout(session);
+		return ResponseEntity
+				.status(HttpStatus.NO_CONTENT)
+				.build();
 	}
 }
