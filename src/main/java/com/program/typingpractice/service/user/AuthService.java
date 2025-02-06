@@ -1,13 +1,16 @@
 package com.program.typingpractice.service.user;
 
 import com.program.typingpractice.domain.user.User;
+import com.program.typingpractice.dto.user.response.LoginResponseDto;
+import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
 import com.program.typingpractice.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.program.typingpractice.dto.user.RegisterRequestDto;
-import com.program.typingpractice.dto.user.LoginRequestDto;
+import com.program.typingpractice.dto.user.request.RegisterRequestDto;
+import com.program.typingpractice.dto.user.request.LoginRequestDto;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +21,15 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthService {
 
+	// 관리자 계정 토큰
+	@Value("${admin.token.secret.key}")
+	private String adminToken;
+
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	@Transactional
-	public String register(RegisterRequestDto requestDto) {
+	public void register(RegisterRequestDto requestDto) {
 		if(userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
 			throw new IllegalArgumentException("Username is already in use");
 		}
@@ -35,14 +42,38 @@ public class AuthService {
 				.email(requestDto.getEmail())
 				.username(requestDto.getUsername())
 				.password(passwordEncoder.encode(requestDto.getPassword()))
-				.roles(Set.of("ROLE_USER"))
+				.roles(Set.of("USER"))
 				.build();
 
 		userRepository.save(user);
-		return "회원가입 성공";
 	}
 
-	public String login(LoginRequestDto requestDto, HttpSession session) {
+	@Transactional
+	public void registerAdmin(RegisterAdminRequestDto requestDto) {
+
+		if(!requestDto.getAdminToken().equals(adminToken)){
+			throw new IllegalArgumentException("Admin token is incorrect");
+		}
+
+		if(userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
+			throw new IllegalArgumentException("Username is already in use");
+		}
+
+		if(userRepository.findByEmail(requestDto.getEmail()).isPresent()){
+			throw new IllegalArgumentException("Email is already in use");
+		}
+
+		User user = User.builder()
+				.email(requestDto.getEmail())
+				.username(requestDto.getUsername())
+				.password(passwordEncoder.encode(requestDto.getPassword()))
+				.roles(Set.of("ADMIN"))
+				.build();
+
+		userRepository.save(user);
+	}
+
+	public LoginResponseDto login(LoginRequestDto requestDto, HttpSession session) {
 		User user = userRepository.findByEmail(requestDto.getEmail())
 				.orElseThrow(() -> new IllegalArgumentException("Email is already in use"));
 
@@ -51,12 +82,11 @@ public class AuthService {
 		}
 
 		session.setAttribute("user", user);
-		return "로그인 성공";
+		return new LoginResponseDto(user.getEmail(), user.getUsername(), user.getRoles());
 	}
 
 	@Transactional
-	public String logout(HttpSession session) {
+	public void logout(HttpSession session) {
 		session.invalidate();
-		return "로그아웃 성공";
 	}
 }
