@@ -23,7 +23,7 @@ public enum ErrorCode {
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
 
     // 인증 관련 예외
-    UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "인증이 필요 합니다."),
+    UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "권한 인증이 필요 합니다."),
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "권한이 없습니다.");
 
     private final HttpStatus status;
