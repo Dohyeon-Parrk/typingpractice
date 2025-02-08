@@ -3,9 +3,12 @@ package com.program.typingpractice.service.user;
 import com.program.typingpractice.domain.user.User;
 import com.program.typingpractice.dto.user.response.LoginResponseDto;
 import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
+import com.program.typingpractice.global.CustomException;
+import com.program.typingpractice.global.ErrorCode;
 import com.program.typingpractice.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,12 +33,25 @@ public class AuthService {
 
 	@Transactional
 	public void register(RegisterRequestDto requestDto) {
+
+		if(requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()){
+			throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
+		}
+
+		if(requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()){
+			throw new CustomException(ErrorCode.USERNAME_REQUIRED);
+		}
+
+		if(requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()){
+			throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
+		}
+
 		if(userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
-			throw new IllegalArgumentException("Username is already in use");
+			throw new CustomException(ErrorCode.USERNAME_ALREADY_EXISTS);
 		}
 
 		if(userRepository.findByEmail(requestDto.getEmail()).isPresent()){
-			throw new IllegalArgumentException("Email is already in use");
+			throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
 		}
 
 		User user = User.builder()
@@ -52,15 +68,27 @@ public class AuthService {
 	public void registerAdmin(RegisterAdminRequestDto requestDto) {
 
 		if(!requestDto.getAdminToken().equals(adminToken)){
-			throw new IllegalArgumentException("Admin token is incorrect");
+			throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+		}
+
+		if(requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()){
+			throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
+		}
+
+		if(requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()){
+			throw new CustomException(ErrorCode.USERNAME_REQUIRED);
+		}
+
+		if(requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()){
+			throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
 		}
 
 		if(userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
-			throw new IllegalArgumentException("Username is already in use");
+			throw new CustomException(ErrorCode.USERNAME_ALREADY_EXISTS);
 		}
 
 		if(userRepository.findByEmail(requestDto.getEmail()).isPresent()){
-			throw new IllegalArgumentException("Email is already in use");
+			throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
 		}
 
 		User user = User.builder()
@@ -74,11 +102,20 @@ public class AuthService {
 	}
 
 	public LoginResponseDto login(LoginRequestDto requestDto, HttpSession session) {
+
+		if(requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()){
+			throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
+		}
+
+		if(requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()){
+			throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
+		}
+
 		User user = userRepository.findByEmail(requestDto.getEmail())
-				.orElseThrow(() -> new IllegalArgumentException("Email is already in use"));
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-			throw new IllegalArgumentException("Wrong password");
+			throw new CustomException(ErrorCode.WRONG_PASSWORD);
 		}
 
 		session.setAttribute("user", user);
