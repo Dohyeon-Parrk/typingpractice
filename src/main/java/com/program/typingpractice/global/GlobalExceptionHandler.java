@@ -3,7 +3,6 @@ package com.program.typingpractice.global;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,20 +26,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    // 커스텀 예외 처리 (CustomException)
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex) {
+    public ResponseEntity<ErrorResponseDto> handleCustomException(CustomException ex) {
         ErrorCode errorCode = ex.getErrorCode();
         return ResponseEntity
                 .status(errorCode.getStatus())
-                .body(new ErrorResponse(errorCode.getStatus().value(), errorCode.getMessage()));
+                .body(new ErrorResponseDto(errorCode.getStatus().value(), errorCode.getMessage()));
     }
 
-    // 📌 기타 예외 처리 (예상하지 못한 오류)
-    @GlobalExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+    // 기타 예외 처리 (예상하지 못한 오류)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleException(Exception ex) {
         return ResponseEntity
                 .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
-                .body(new ErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR.getStatus().value(), ex.getMessage()));
+                .body(new ErrorResponseDto(ErrorCode.INTERNAL_SERVER_ERROR.getStatus().value(), ex.getMessage()));
     }
 }
