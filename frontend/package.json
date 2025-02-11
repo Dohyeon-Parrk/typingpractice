@@ -16,6 +16,7 @@
     "devextreme": "^24.2.3",
     "devextreme-vue": "^24.2.3",
     "jenesius-vue-modal": "^1.11.9",
+    "mitt": "^3.0.1",
     "node-sass": "^9.0.0",
     "pinia": "^2.3.1",
     "sass-loader": "^16.0.4",
