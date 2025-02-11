@@ -135,16 +135,6 @@ export default {
         this.isAuthenticated = false;
       }
     },
-    // async logout(){
-    //   try{
-    //     await axios.get('/auth/logout');
-    //     this.isAuthenticated = false;
-    //     this.username = '';
-    //     console.log('로그아웃 성공');
-    //   } catch(error){
-    //     console.log('로그아웃 실패', error.response);
-    //   }
-    // },
     googleLogin() {
       console.log("Google login clicked");
       this.showModal = false; // 모달 닫기
