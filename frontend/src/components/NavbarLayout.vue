@@ -1,12 +1,12 @@
 <template>
   <nav class="navbar">
     <div class="container">
-      <router-link to="/" class="logo">Typing-practice.github.io</router-link>
+      <router-link to="/" class="logo">Typing-practice</router-link>
       <ul class="nav-links">
         <li><router-link to="/" class="nav-item">Home</router-link></li>
         <li><router-link to="/courses" class="nav-item">Courses</router-link></li>
         <li v-if="!isAuthenticated">
-          <router-link to="/login" class="nav-item">Login</router-link>
+          <button class="nav-item" @click.prevent="openLoginModal">Login</button>
         </li>
         <li v-else>
           <button class="nav-item logout-btn" @click="logout">Logout</button>
@@ -18,37 +18,62 @@
 
 <script>
 import axios from '@/api/axios';
+import { eventBus } from "@/api/eventBus";
 
 export default {
   data() {
     return {
-      isAuthenticated: false
+      isAuthenticated: localStorage.getItem("isAuthenticated") === 'true'
     };
   },
   mounted() {
     this.checkSession();
+
+    eventBus.on('loginSuccess', () => {
+      this.isAuthenticated = true;
+      localStorage.setItem('isAuthenticated', 'true');
+    })
+
+    eventBus.on('loginSuccess', () => {
+      this.isAuthenticated = false;
+      localStorage.removeItem('isAuthenticated');
+    })
   },
   methods: {
     async checkSession() {
       try {
         const response = await axios.get('/auth/me', { withCredentials: true });
         console.log('세션 유지 상태:', response.data);
+
         this.isAuthenticated = true;
+
+        localStorage.setItem('isAuthenticated', 'true');
       } catch (error) {
         console.log('세션 없음:', error.response);
+
         this.isAuthenticated = false;
+
+        localStorage.removeItem('isAuthenticated');
       }
     },
     async logout(){
       try{
-        await axios.get('/auth/logout');
+        await axios.post('/api/auth/logout', {}, { withCredentials: true });
+        console.log('로그아웃 성공');
+
         this.isAuthenticated = false;
         this.username = '';
-        console.log('로그아웃 성공');
-      } catch(error){
+
+        localStorage.removeItem('isAuthenticated');
+
+        this.$router.push('/');
+      } catch (error) {
         console.log('로그아웃 실패', error.response);
       }
     },
+    openLoginModal(){
+      eventBus.emit('openLoginModal');
+    }
   }
 };
 </script>
@@ -82,6 +107,10 @@ export default {
   text-decoration: none;
   color: white;
   cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  padding: 0;
 }
 
 .nav-item:hover {

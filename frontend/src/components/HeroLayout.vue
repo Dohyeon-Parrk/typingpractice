@@ -13,17 +13,17 @@
         <form @submit.prevent="submitForm">
           <div>
             <label for="email">Email</label>
-            <input type="email" id="email" v-model="email" required />
+            <input type="email" id="email" v-model="email" required/>
           </div>
           <div>
             <label for="password">Password</label>
-            <input type="password" id="password" v-model="password" required />
+            <input type="password" id="password" v-model="password" required/>
           </div>
           <button type="submit" class="google-btn">Login</button>
         </form>
         <div class="separator"></div>
         <button class="google-btn" @click="googleLogin">
-          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="google-logo" />
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="google-logo"/>
           Sign in with Google
         </button>
         <div class="separator"></div>
@@ -38,15 +38,15 @@
         <form @submit.prevent="submitRegisterForm">
           <div>
             <label for="register-email">Email</label>
-            <input type="email" id="register-email" v-model="registerEmail" required />
+            <input type="email" id="register-email" v-model="registerEmail" required/>
           </div>
           <div>
             <label for="register-username">Username</label>
-            <input type="text" id="register-username" v-model="registerUsername" required />
+            <input type="text" id="register-username" v-model="registerUsername" required/>
           </div>
           <div>
             <label for="register-password">Password</label>
-            <input type="password" id="register-password" v-model="registerPassword" required />
+            <input type="password" id="register-password" v-model="registerPassword" required/>
           </div>
           <button type="submit" class="google-btn">Register</button>
         </form>
@@ -59,6 +59,7 @@
 
 <script>
 import axios from '@/api/axios';
+import {eventBus} from "@/api/eventBus";
 
 export default {
   data() {
@@ -75,27 +76,39 @@ export default {
     };
   },
   mounted() {
+    eventBus.on('openLoginModal', () => {
+      this.showModal = true;
+    });
+
     this.checkSession();
     // console.log("mounted 실행:")
   },
   methods: {
     async submitForm() {
       try {
-        const response = await axios.post('/auth/login', {
-          email: this.email,
-          password: this.password,
-        }, {withCredentials: true});
+        const response = await axios.post(
+            '/auth/login',
+            {
+              email: this.email,
+              password: this.password,
+            },
+            {
+              withCredentials: true
+            });
         console.log('로그인 성공', response.data);
+
         this.isAuthenticated = true;
         this.username = response.data.username;
         this.showModal = false;
+
+        eventBus.emit('loginSuccess');
       } catch (error) {
         console.log('로그인 실패', error.response);
         alert('로그인에 실패했습니다.');
       }
     },
-    async submitRegisterForm(){
-      try{
+    async submitRegisterForm() {
+      try {
         await axios.post('/auth/register', {
           email: this.registerEmail,
           username: this.registerUsername,
@@ -104,42 +117,44 @@ export default {
         alert('회원가입 성공!');
         this.showRegisterModal = false;
         this.showModal = true;
-      } catch (error){
+      } catch (error) {
         console.log('회원가입 실패', error.response);
         alert('회원가입에 실패했습니다.');
       }
     },
-    async checkSession(){
+    async checkSession() {
       try {
         const response = await axios.get('/auth/me');
         console.log('세션 유지 상태:', response.data);
+
         this.isAuthenticated = true;
         this.username = response.data.username;
-      } catch(error){
+      } catch (error) {
         console.log('세션 없음', error.response);
+
         this.isAuthenticated = false;
       }
     },
-    async logout(){
-      try{
-        await axios.get('/auth/logout');
-        this.isAuthenticated = false;
-        this.username = '';
-        console.log('로그아웃 성공');
-      } catch(error){
-        console.log('로그아웃 실패', error.response);
-      }
-    },
+    // async logout(){
+    //   try{
+    //     await axios.get('/auth/logout');
+    //     this.isAuthenticated = false;
+    //     this.username = '';
+    //     console.log('로그아웃 성공');
+    //   } catch(error){
+    //     console.log('로그아웃 실패', error.response);
+    //   }
+    // },
     googleLogin() {
       console.log("Google login clicked");
       this.showModal = false; // 모달 닫기
       window.location.href = "http://localhost:8080/oauth2/authorization/google";
     },
-    openRegisterModal(){
+    openRegisterModal() {
       this.showModal = false;
       this.showRegisterModal = true;
     },
-    openLoginModal(){
+    openLoginModal() {
       this.showRegisterModal = false;
       this.showModal = true;
     }
