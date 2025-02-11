@@ -9,8 +9,9 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponseDto {
+public class AuthResponseDto {
+    private String message;
     private String email;
-    private String password;
+    private String username;
     private Set<String> roles;
 }
