@@ -1,5 +1,6 @@
 package com.program.typingpractice.controller.user;
 
+import com.program.typingpractice.domain.user.User;
 import com.program.typingpractice.dto.user.response.LoginResponseDto;
 import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
 import jakarta.validation.Valid;
@@ -13,6 +14,8 @@ import com.program.typingpractice.service.user.AuthService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,5 +54,10 @@ public class AuthController {
 		return ResponseEntity
 				.status(HttpStatus.NO_CONTENT)
 				.build();
+	}
+
+	@GetMapping("/me")
+	public Optional<User> getAuthenticatedUser(HttpSession session){
+		return Optional.ofNullable((User) session.getAttribute("user"));
 	}
 }
