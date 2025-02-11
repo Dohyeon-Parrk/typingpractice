@@ -128,16 +128,17 @@ public class AuthService {
     }
 
     public void logout(HttpSession session) {
-        if (session != null) {
-            session.invalidate();
+        if (session == null || session.getAttribute("user") == null) {
+            throw new CustomException(ErrorCode.SESSION_NOT_FOUND);
         }
+            session.invalidate();
     }
 
     public ResponseEntity<AuthResponseDto> checkSession(HttpSession session) {
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);    // 세션 ErrorCode 추가하기
+            throw new CustomException(ErrorCode.SESSION_NOT_FOUND);
         }
 
         AuthResponseDto responseDto = new AuthResponseDto("세션 계정", user.getEmail(), user.getUsername(), user.getRoles());
