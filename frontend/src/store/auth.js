@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('auth', {
             }
         },
         async logout(){
-            await api.post('/api/auth/logout');
+            await api.get('/api/auth/logout');
             this.user = null;
         }
     }
