@@ -1,21 +1,16 @@
 package com.program.typingpractice.controller.user;
 
-import com.program.typingpractice.domain.user.User;
-import com.program.typingpractice.dto.user.response.LoginResponseDto;
+import com.program.typingpractice.dto.user.request.LoginRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
+import com.program.typingpractice.dto.user.request.RegisterRequestDto;
+import com.program.typingpractice.dto.user.response.LoginResponseDto;
+import com.program.typingpractice.service.user.AuthService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.program.typingpractice.dto.user.request.RegisterRequestDto;
-import com.program.typingpractice.dto.user.request.LoginRequestDto;
-import com.program.typingpractice.service.user.AuthService;
-
-import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
-
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,7 +43,7 @@ public class AuthController {
 				.body(responseDto);
 	}
 
-	@GetMapping("/logout/{userId}")
+	@PostMapping("/logout")
 	public ResponseEntity<Void> logout(HttpSession session){
 		authService.logout(session);
 		return ResponseEntity
@@ -56,8 +51,8 @@ public class AuthController {
 				.build();
 	}
 
-	@GetMapping("/me")
-	public Optional<User> getAuthenticatedUser(HttpSession session){
-		return Optional.ofNullable((User) session.getAttribute("user"));
+	@GetMapping("/session")
+	public ResponseEntity<LoginResponseDto> checkSession(HttpSession session){
+		return authService.checkSession(session);
 	}
 }
