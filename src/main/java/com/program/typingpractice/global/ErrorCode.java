@@ -24,7 +24,12 @@ public enum ErrorCode {
 
     // 인증 관련 예외
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "권한 인증이 필요 합니다."),
-    FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+    FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "권한이 없습니다."),
+
+    // 세션 관련 예외
+    SESSION_NOT_FOUND(HttpStatus.UNAUTHORIZED, "세션이 존재하지 않습니다."),
+    SESSION_EXPIRED(HttpStatus.UNAUTHORIZED, "세션이 만료되었습니다. 다시 로그인해주세요.");
+
 
     private final HttpStatus status;
     private final String message;
