@@ -1,22 +1,19 @@
 package com.program.typingpractice.service.user;
 
 import com.program.typingpractice.domain.user.User;
-import com.program.typingpractice.dto.user.response.LoginResponseDto;
+import com.program.typingpractice.dto.user.request.LoginRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
+import com.program.typingpractice.dto.user.request.RegisterRequestDto;
+import com.program.typingpractice.dto.user.response.LoginResponseDto;
 import com.program.typingpractice.global.CustomException;
 import com.program.typingpractice.global.ErrorCode;
 import com.program.typingpractice.repository.user.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.program.typingpractice.dto.user.request.RegisterRequestDto;
-import com.program.typingpractice.dto.user.request.LoginRequestDto;
-
-import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Set;
 
