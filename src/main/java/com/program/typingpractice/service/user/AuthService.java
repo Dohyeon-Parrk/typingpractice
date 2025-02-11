@@ -4,7 +4,7 @@ import com.program.typingpractice.domain.user.User;
 import com.program.typingpractice.dto.user.request.LoginRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterRequestDto;
-import com.program.typingpractice.dto.user.response.LoginResponseDto;
+import com.program.typingpractice.dto.user.response.AuthResponseDto;
 import com.program.typingpractice.global.CustomException;
 import com.program.typingpractice.global.ErrorCode;
 import com.program.typingpractice.repository.user.UserRepository;
@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,106 +22,125 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthService {
 
-	// 관리자 계정 토큰
-	@Value("${admin.token.secret.key}")
-	private String adminToken;
+    // 관리자 계정 토큰
+    @Value("${admin.token.secret.key}")
+    private String adminToken;
 
-	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-	@Transactional
-	public void register(RegisterRequestDto requestDto) {
+    @Transactional
+    public AuthResponseDto register(RegisterRequestDto requestDto) {
 
-		if(requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()){
-			throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
-		}
+        if (requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
+        }
 
-		if(requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()){
-			throw new CustomException(ErrorCode.USERNAME_REQUIRED);
-		}
+        if (requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.USERNAME_REQUIRED);
+        }
 
-		if(requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()){
-			throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
-		}
+        if (requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
+        }
 
-		if(userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
-			throw new CustomException(ErrorCode.USERNAME_ALREADY_EXISTS);
-		}
+        if (userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
+            throw new CustomException(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
 
-		if(userRepository.findByEmail(requestDto.getEmail()).isPresent()){
-			throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
-		}
+        if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
 
-		User user = User.builder()
-				.email(requestDto.getEmail())
-				.username(requestDto.getUsername())
-				.password(passwordEncoder.encode(requestDto.getPassword()))
-				.roles(Set.of("USER"))
-				.build();
+        User user = User.builder()
+                .email(requestDto.getEmail())
+                .username(requestDto.getUsername())
+                .password(passwordEncoder.encode(requestDto.getPassword()))
+                .roles(Set.of("USER"))
+                .build();
 
-		userRepository.save(user);
-	}
+        userRepository.save(user);
 
-	@Transactional
-	public void registerAdmin(RegisterAdminRequestDto requestDto) {
+        return new AuthResponseDto(
+                "회원가입 완료", user.getEmail(), user.getUsername(), user.getRoles());
+    }
 
-		if(!requestDto.getAdminToken().equals(adminToken)){
-			throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
-		}
+    @Transactional
+    public AuthResponseDto registerAdmin(RegisterAdminRequestDto requestDto) {
 
-		if(requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()){
-			throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
-		}
+        if (!requestDto.getAdminToken().equals(adminToken)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
-		if(requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()){
-			throw new CustomException(ErrorCode.USERNAME_REQUIRED);
-		}
+        if (requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
+        }
 
-		if(requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()){
-			throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
-		}
+        if (requestDto.getUsername() == null || requestDto.getUsername().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.USERNAME_REQUIRED);
+        }
 
-		if(userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
-			throw new CustomException(ErrorCode.USERNAME_ALREADY_EXISTS);
-		}
+        if (requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
+        }
 
-		if(userRepository.findByEmail(requestDto.getEmail()).isPresent()){
-			throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
-		}
+        if (userRepository.findByUsername(requestDto.getUsername()).isPresent()) {
+            throw new CustomException(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
 
-		User user = User.builder()
-				.email(requestDto.getEmail())
-				.username(requestDto.getUsername())
-				.password(passwordEncoder.encode(requestDto.getPassword()))
-				.roles(Set.of("ADMIN"))
-				.build();
+        if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
 
-		userRepository.save(user);
-	}
+        User admin = User.builder()
+                .email(requestDto.getEmail())
+                .username(requestDto.getUsername())
+                .password(passwordEncoder.encode(requestDto.getPassword()))
+                .roles(Set.of("ADMIN"))
+                .build();
 
-	public LoginResponseDto login(LoginRequestDto requestDto, HttpSession session) {
+        userRepository.save(admin);
 
-		if(requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()){
-			throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
-		}
+        return new AuthResponseDto(
+                "관리자 등록 완료", admin.getEmail(), admin.getUsername(), admin.getRoles());
+    }
 
-		if(requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()){
-			throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
-		}
+    public AuthResponseDto login(LoginRequestDto requestDto, HttpSession session) {
 
-		User user = userRepository.findByEmail(requestDto.getEmail())
-				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        if (requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
+        }
 
-		if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-			throw new CustomException(ErrorCode.WRONG_PASSWORD);
-		}
+        if (requestDto.getPassword() == null || requestDto.getPassword().trim().isEmpty()) {
+            throw new CustomException(ErrorCode.PASSWORD_REQUIRED);
+        }
 
-		session.setAttribute("user", user);
-		return new LoginResponseDto(user.getEmail(), user.getUsername(), user.getRoles());
-	}
+        User user = userRepository.findByEmail(requestDto.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-	@Transactional
-	public void logout(HttpSession session) {
-		session.invalidate();
-	}
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.WRONG_PASSWORD);
+        }
+
+        session.setAttribute("user", user);
+        return new AuthResponseDto(
+                "로그인 성공", user.getEmail(), user.getUsername(), user.getRoles());
+    }
+
+    public void logout(HttpSession session) {
+        if (session != null) {
+            session.invalidate();
+        }
+    }
+
+    public ResponseEntity<AuthResponseDto> checkSession(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);    // 세션 ErrorCode 추가하기
+        }
+
+        AuthResponseDto responseDto = new AuthResponseDto("세션 계정", user.getEmail(), user.getUsername(), user.getRoles());
+        return ResponseEntity.ok(responseDto);
+    }
 }
