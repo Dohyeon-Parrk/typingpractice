@@ -3,7 +3,7 @@ package com.program.typingpractice.controller.user;
 import com.program.typingpractice.dto.user.request.LoginRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterRequestDto;
-import com.program.typingpractice.dto.user.response.LoginResponseDto;
+import com.program.typingpractice.dto.user.response.AuthResponseDto;
 import com.program.typingpractice.service.user.AuthService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -20,24 +20,24 @@ public class AuthController {
 	private final AuthService authService;
 
 	@PostMapping("/register")
-	public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto requestDto) {
-		authService.register(requestDto);
+	public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody RegisterRequestDto requestDto) {
+		AuthResponseDto responseDto = authService.register(requestDto);
 		return ResponseEntity
 				.status(HttpStatus.CREATED)
-				.body("회원가입 완료");
+				.body(responseDto);
 	}
 
 	@PostMapping("/register/admin")
-	public ResponseEntity<String> registerAdmin(@Valid @RequestBody RegisterAdminRequestDto requestDto) {
-		authService.registerAdmin(requestDto);
+	public ResponseEntity<AuthResponseDto> registerAdmin(@Valid @RequestBody RegisterAdminRequestDto requestDto) {
+		AuthResponseDto responseDto = authService.registerAdmin(requestDto);
 		return ResponseEntity
 				.status(HttpStatus.CREATED)
-				.body("관리자 등록 완료");
+				.body(responseDto);
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto, HttpSession session){
-		LoginResponseDto responseDto = authService.login(requestDto, session);
+	public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto, HttpSession session){
+		AuthResponseDto responseDto = authService.login(requestDto, session);
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(responseDto);
@@ -52,7 +52,7 @@ public class AuthController {
 	}
 
 	@GetMapping("/session")
-	public ResponseEntity<LoginResponseDto> checkSession(HttpSession session){
+	public ResponseEntity<AuthResponseDto> checkSession(HttpSession session){
 		return authService.checkSession(session);
 	}
 }

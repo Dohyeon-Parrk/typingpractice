@@ -4,7 +4,7 @@ import com.program.typingpractice.domain.user.User;
 import com.program.typingpractice.dto.user.request.LoginRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterRequestDto;
-import com.program.typingpractice.dto.user.response.LoginResponseDto;
+import com.program.typingpractice.dto.user.response.AuthResponseDto;
 import com.program.typingpractice.global.CustomException;
 import com.program.typingpractice.global.ErrorCode;
 import com.program.typingpractice.repository.user.UserRepository;
@@ -30,7 +30,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void register(RegisterRequestDto requestDto) {
+    public AuthResponseDto register(RegisterRequestDto requestDto) {
 
         if (requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()) {
             throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
@@ -60,10 +60,13 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+
+        return new AuthResponseDto(
+                "회원가입 완료", user.getEmail(), user.getUsername(), user.getRoles());
     }
 
     @Transactional
-    public void registerAdmin(RegisterAdminRequestDto requestDto) {
+    public AuthResponseDto registerAdmin(RegisterAdminRequestDto requestDto) {
 
         if (!requestDto.getAdminToken().equals(adminToken)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
@@ -89,17 +92,20 @@ public class AuthService {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        User user = User.builder()
+        User admin = User.builder()
                 .email(requestDto.getEmail())
                 .username(requestDto.getUsername())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
                 .roles(Set.of("ADMIN"))
                 .build();
 
-        userRepository.save(user);
+        userRepository.save(admin);
+
+        return new AuthResponseDto(
+                "관리자 등록 완료", admin.getEmail(), admin.getUsername(), admin.getRoles());
     }
 
-    public LoginResponseDto login(LoginRequestDto requestDto, HttpSession session) {
+    public AuthResponseDto login(LoginRequestDto requestDto, HttpSession session) {
 
         if (requestDto.getEmail() == null || requestDto.getEmail().trim().isEmpty()) {
             throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
@@ -117,7 +123,8 @@ public class AuthService {
         }
 
         session.setAttribute("user", user);
-        return new LoginResponseDto(user.getEmail(), user.getUsername(), user.getRoles());
+        return new AuthResponseDto(
+                "로그인 성공", user.getEmail(), user.getUsername(), user.getRoles());
     }
 
     public void logout(HttpSession session) {
@@ -126,14 +133,14 @@ public class AuthService {
         }
     }
 
-    public ResponseEntity<LoginResponseDto> checkSession(HttpSession session) {
+    public ResponseEntity<AuthResponseDto> checkSession(HttpSession session) {
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);    // 세션 ErrorCode 추가하기
         }
 
-        LoginResponseDto responseDto = new LoginResponseDto(user.getEmail(), user.getUsername(), user.getRoles());
+        AuthResponseDto responseDto = new AuthResponseDto("세션 계정", user.getEmail(), user.getUsername(), user.getRoles());
         return ResponseEntity.ok(responseDto);
     }
 }
