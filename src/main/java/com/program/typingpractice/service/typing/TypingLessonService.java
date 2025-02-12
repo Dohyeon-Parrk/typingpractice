@@ -55,7 +55,7 @@ public class TypingLessonService {
     // 레슨 추가 (관리자)
     @Transactional
     public TypingLessonResponseDto createLesson(TypingLessonRequestDto requestDto, HttpSession session) {
-        checkAdminPermission(session);
+        User user = getAuthenticatedUser(session);
 
         if (typingLessonRepository.findByTitle(requestDto.getTitle()).isPresent()) {
             throw new CustomException(ErrorCode.LESSON_ALREADY_EXISTS);
@@ -76,7 +76,7 @@ public class TypingLessonService {
     // 레슨 업데이트 (관리자)
     @Transactional
     public TypingLessonResponseDto updateLesson(Long lessonId, TypingLessonRequestDto requestDto, HttpSession session) {
-        checkAdminPermission(session);
+        User user = getAuthenticatedUser(session);
 
         TypingLesson lesson = typingLessonRepository.findById(lessonId)
                 .orElseThrow(() -> new CustomException(ErrorCode.LESSON_NOT_FOUND));
@@ -89,7 +89,7 @@ public class TypingLessonService {
     // 레슨 삭제 (관리자)
     @Transactional
     public void deleteLesson(Long lessonId, HttpSession session) {
-        checkAdminPermission(session);
+        User user = getAuthenticatedUser(session);
 
         TypingLesson lesson = typingLessonRepository.findById(lessonId)
                 .orElseThrow(() -> new CustomException(ErrorCode.LESSON_NOT_FOUND));
@@ -100,11 +100,12 @@ public class TypingLessonService {
     }
 
     // 관리자 권한 확인 메소드
-    private void checkAdminPermission(HttpSession session) {
-        Object user = session.getAttribute("user");
-
-        if (user == null || !((List<String>) session.getAttribute("roles")).contains("ADMIN")) {
+    private User getAuthenticatedUser(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
+        return user;
     }
+
 }
