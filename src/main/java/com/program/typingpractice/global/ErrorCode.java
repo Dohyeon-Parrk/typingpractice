@@ -21,6 +21,7 @@ public enum ErrorCode {
     PASSWORD_REQUIRED(HttpStatus.BAD_REQUEST, "비밀번호는 필수 입력 사항 입니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."),
+    ERR_LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요 합니다."),
 
     // 인증 관련 예외
     UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "권한 인증이 필요 합니다."),
@@ -28,7 +29,12 @@ public enum ErrorCode {
 
     // 세션 관련 예외
     SESSION_NOT_FOUND(HttpStatus.UNAUTHORIZED, "세션이 존재하지 않습니다."),
-    SESSION_EXPIRED(HttpStatus.UNAUTHORIZED, "세션이 만료되었습니다. 다시 로그인해주세요.");
+    SESSION_EXPIRED(HttpStatus.UNAUTHORIZED, "세션이 만료되었습니다. 다시 로그인해주세요."),
+
+    // 레슨 관련 예외
+    LESSON_NOT_FOUND(HttpStatus.NOT_FOUND, "레슨을 찾을 수 없습니다."),
+    LESSON_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 레슨 입니다.");
+
 
 
     private final HttpStatus status;
