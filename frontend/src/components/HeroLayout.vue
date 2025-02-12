@@ -97,11 +97,9 @@ export default {
             });
         console.log('로그인 성공', response.data);
 
-        this.isAuthenticated = true;
-        this.username = response.data.username;
+        eventBus.emit('loginSuccess');
         this.showModal = false;
 
-        eventBus.emit('loginSuccess');
       } catch (error) {
         console.log('로그인 실패', error.response);
         alert('로그인에 실패했습니다.');
@@ -124,7 +122,7 @@ export default {
     },
     async checkSession() {
       try {
-        const response = await axios.get('/auth/me');
+        const response = await axios.get('/auth/session');
         console.log('세션 유지 상태:', response.data);
 
         this.isAuthenticated = true;

@@ -29,12 +29,14 @@ export default {
   mounted() {
     this.checkSession();
 
+    // 로그인 성공 시 isAuthenticated -> true
     eventBus.on('loginSuccess', () => {
       this.isAuthenticated = true;
       localStorage.setItem('isAuthenticated', 'true');
     })
 
-    eventBus.on('loginSuccess', () => {
+    // 로그아웃 시 isAuthenticated -> remove
+    eventBus.on('logoutSuccess', () => {
       this.isAuthenticated = false;
       localStorage.removeItem('isAuthenticated');
     })
@@ -42,7 +44,7 @@ export default {
   methods: {
     async checkSession() {
       try {
-        const response = await axios.get('/auth/me', { withCredentials: true });
+        const response = await axios.get('/auth/session', { withCredentials: true });
         console.log('세션 유지 상태:', response.data);
 
         this.isAuthenticated = true;
@@ -61,8 +63,8 @@ export default {
         await axios.post('/api/auth/logout', {}, { withCredentials: true });
         console.log('로그아웃 성공');
 
-        this.isAuthenticated = false;
-        this.username = '';
+        // 로그아웃 이벤트
+        eventBus.emit('logoutSuccess');
 
         localStorage.removeItem('isAuthenticated');
 
