@@ -1,4 +1,4 @@
-package com.program.typingpractice.domain.lesson;
+package com.program.typingpractice.domain.typing;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
