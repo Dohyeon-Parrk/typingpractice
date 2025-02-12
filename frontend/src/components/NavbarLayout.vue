@@ -23,11 +23,12 @@ import { eventBus } from "@/api/eventBus";
 export default {
   data() {
     return {
-      isAuthenticated: localStorage.getItem("isAuthenticated") === 'true'
+      isAuthenticated: false,
     };
   },
   mounted() {
     this.checkSession();
+    // this.checkSessionPeriodically();
 
     // 로그인 성공 시 isAuthenticated -> true
     eventBus.on('loginSuccess', () => {
@@ -44,38 +45,57 @@ export default {
   methods: {
     async checkSession() {
       try {
-        const response = await axios.get('/auth/session', { withCredentials: true });
+        const response = await axios.get('/auth/session', {withCredentials: true});
         console.log('세션 유지 상태:', response.data);
 
-        this.isAuthenticated = true;
-
-        localStorage.setItem('isAuthenticated', 'true');
+        if(response.data.email){
+          this.isAuthenticated = true;
+          localStorage.setItem('isAuthenticated', 'true');
+        } else {
+          this.isAuthenticated = false;
+          localStorage.removeItem("isAuthenticated");
+        }
       } catch (error) {
-        console.log('세션 없음:', error.response);
+        console.log('세션 없음', error.response);
+
+        eventBus.emit('logoutSuccess');
 
         this.isAuthenticated = false;
-
         localStorage.removeItem('isAuthenticated');
       }
     },
     async logout(){
       try{
-        await axios.post('/api/auth/logout', {}, { withCredentials: true });
+        await axios.post('/auth/logout', {}, { withCredentials: true });
         console.log('로그아웃 성공');
+
+        await this.checkSession();
 
         // 로그아웃 이벤트
         eventBus.emit('logoutSuccess');
 
+        // localStorage 에서 인증 정보 삭제
         localStorage.removeItem('isAuthenticated');
 
+        // 세션 쿠키 삭제
+        document.cookie = "JSESSIONID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        this.isAuthenticated = false;
         this.$router.push('/');
+
       } catch (error) {
         console.log('로그아웃 실패', error.response);
       }
     },
     openLoginModal(){
       eventBus.emit('openLoginModal');
-    }
+    },
+
+    // checkSessionPeriodically(){
+    //   setInterval(async () => {
+    //     await this.checkSession();
+    //   }, 10000);
+    // }
   }
 };
 </script>

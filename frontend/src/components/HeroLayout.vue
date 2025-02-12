@@ -80,23 +80,25 @@ export default {
       this.showModal = true;
     });
 
-    this.checkSession();
-    // console.log("mounted 실행:")
+    eventBus.on('loginSuccess', () => {
+      this.isAuthenticated = true;
+    });
+
+    eventBus.on('logoutSuccess', () => {
+      this.isAuthenticated = false;
+    })
   },
   methods: {
     async submitForm() {
       try {
         const response = await axios.post(
-            '/auth/login',
-            {
+            '/auth/login', {
               email: this.email,
               password: this.password,
-            },
-            {
-              withCredentials: true
             });
         console.log('로그인 성공', response.data);
 
+        localStorage.setItem('isAuthenticated', 'true');
         eventBus.emit('loginSuccess');
         this.showModal = false;
 
@@ -118,19 +120,6 @@ export default {
       } catch (error) {
         console.log('회원가입 실패', error.response);
         alert('회원가입에 실패했습니다.');
-      }
-    },
-    async checkSession() {
-      try {
-        const response = await axios.get('/auth/session');
-        console.log('세션 유지 상태:', response.data);
-
-        this.isAuthenticated = true;
-        this.username = response.data.username;
-      } catch (error) {
-        console.log('세션 없음', error.response);
-
-        this.isAuthenticated = false;
       }
     },
     googleLogin() {
