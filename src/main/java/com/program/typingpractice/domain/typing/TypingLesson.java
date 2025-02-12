@@ -35,4 +35,11 @@ public class TypingLesson {
         this.difficulty = difficulty;
         this.content = content;
     }
+
+    public void updateLesson(String title, String language, String difficulty, String content) {
+        this.title = title;
+        this.language = language;
+        this.difficulty = difficulty;
+        this.content = content;
+    }
 }
