@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "lessons")
-public class Lesson {
+public class TypingLesson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,7 @@ public class Lesson {
     private String content;
 
     @Builder
-    public Lesson(String title, String language, String difficulty, String content) {
+    public TypingLesson(String title, String language, String difficulty, String content) {
         this.title = title;
         this.language = language;
         this.difficulty = difficulty;
