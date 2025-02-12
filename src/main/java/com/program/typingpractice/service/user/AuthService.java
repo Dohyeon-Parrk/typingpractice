@@ -131,7 +131,7 @@ public class AuthService {
         if (session == null || session.getAttribute("user") == null) {
             throw new CustomException(ErrorCode.SESSION_NOT_FOUND);
         }
-            session.invalidate();
+        session.invalidate();
     }
 
     public ResponseEntity<AuthResponseDto> checkSession(HttpSession session) {
