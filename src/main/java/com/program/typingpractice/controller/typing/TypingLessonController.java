@@ -3,11 +3,12 @@ package com.program.typingpractice.controller.typing;
 import com.program.typingpractice.dto.typing.request.TypingLessonRequestDto;
 import com.program.typingpractice.dto.typing.response.TypingLessonResponseDto;
 import com.program.typingpractice.service.typing.TypingLessonService;
-import jakarta.servlet.http.HttpSession;
+import com.program.typingpractice.service.user.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,7 +18,7 @@ public class TypingLessonController {
 
     private final TypingLessonService typingLessonService;
 
-    // 레슨 목록 조회 ( 일반 유저 )
+    // 레슨 목록 조회 ( 모든 사용자 -> 로그인 없이 조회 가능 )
     @GetMapping
     public ResponseEntity<TypingLessonResponseDto> getLessons(
             @RequestParam(required = false) String language,
@@ -31,8 +32,9 @@ public class TypingLessonController {
     // 단건 조회 ( 일반 유저 )
     @GetMapping("/{lessonId}")
     public ResponseEntity<TypingLessonResponseDto> getLessonById(
-            @PathVariable Long lessonId, HttpSession session){
-        TypingLessonResponseDto responseDto = typingLessonService.getLessonById(lessonId, session);
+            @PathVariable Long lessonId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails){
+        TypingLessonResponseDto responseDto = typingLessonService.getLessonById(lessonId, customUserDetails);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(responseDto);
@@ -42,8 +44,8 @@ public class TypingLessonController {
     @PostMapping
     public ResponseEntity<TypingLessonResponseDto> createLesson(
             @Valid @RequestBody TypingLessonRequestDto requestDto,
-            HttpSession session) {
-        TypingLessonResponseDto responseDto = typingLessonService.createLesson(requestDto, session);
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        TypingLessonResponseDto responseDto = typingLessonService.createLesson(requestDto, customUserDetails);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(responseDto);
@@ -54,8 +56,8 @@ public class TypingLessonController {
     public ResponseEntity<TypingLessonResponseDto> updateLesson(
             @PathVariable Long lessonId,
             @Valid @RequestBody TypingLessonRequestDto requestDto,
-            HttpSession session) {
-        TypingLessonResponseDto responseDto = typingLessonService.updateLesson(lessonId, requestDto, session);
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        TypingLessonResponseDto responseDto = typingLessonService.updateLesson(lessonId, requestDto, customUserDetails);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(responseDto);
@@ -63,8 +65,9 @@ public class TypingLessonController {
 
     // 레슨 삭제 (관리자)
     @DeleteMapping("/{lessonId}")
-    public ResponseEntity<TypingLessonResponseDto> deleteLesson(@PathVariable Long lessonId, HttpSession session) {
-        typingLessonService.deleteLesson(lessonId, session);
+    public ResponseEntity<TypingLessonResponseDto> deleteLesson(@PathVariable Long lessonId,
+                                                                @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        typingLessonService.deleteLesson(lessonId, customUserDetails);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();

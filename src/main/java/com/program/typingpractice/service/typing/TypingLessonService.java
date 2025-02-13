@@ -8,6 +8,7 @@ import com.program.typingpractice.global.CustomException;
 import com.program.typingpractice.global.ErrorCode;
 import com.program.typingpractice.repository.typing.TypingLessonRepository;
 import com.program.typingpractice.repository.user.UserRepository;
+import com.program.typingpractice.service.user.CustomUserDetails;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class TypingLessonService {
     private final TypingLessonRepository typingLessonRepository;
     private final UserRepository userRepository;
 
-    // 레슨 목록 조회 (일반 유저)
+    // 레슨 목록 조회 (모든 사용자 -> 로그인 없이 조회 가능)
     public TypingLessonResponseDto getLessons(String language, String difficulty) {
         List<TypingLesson> lessons;
 
@@ -40,9 +41,8 @@ public class TypingLessonService {
     }
 
     // 단건 조회 ( 일반 유저 )
-    public TypingLessonResponseDto getLessonById(Long lessonId, HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if(user == null) {
+    public TypingLessonResponseDto getLessonById(Long lessonId, CustomUserDetails customUserDetails) {
+        if(customUserDetails == null) {
             throw new CustomException(ErrorCode.ERR_LOGIN_REQUIRED);
         }
 
@@ -54,8 +54,10 @@ public class TypingLessonService {
 
     // 레슨 추가 (관리자)
     @Transactional
-    public TypingLessonResponseDto createLesson(TypingLessonRequestDto requestDto, HttpSession session) {
-        User user = getAuthenticatedUser(session);
+    public TypingLessonResponseDto createLesson(TypingLessonRequestDto requestDto, CustomUserDetails customUserDetails) {
+        if(!customUserDetails.user().isAdmin()){
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
 
         if (typingLessonRepository.findByTitle(requestDto.getTitle()).isPresent()) {
             throw new CustomException(ErrorCode.LESSON_ALREADY_EXISTS);
@@ -75,8 +77,10 @@ public class TypingLessonService {
 
     // 레슨 업데이트 (관리자)
     @Transactional
-    public TypingLessonResponseDto updateLesson(Long lessonId, TypingLessonRequestDto requestDto, HttpSession session) {
-        User user = getAuthenticatedUser(session);
+    public TypingLessonResponseDto updateLesson(Long lessonId, TypingLessonRequestDto requestDto, CustomUserDetails customUserDetails) {
+        if(!customUserDetails.user().isAdmin()){
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
 
         TypingLesson lesson = typingLessonRepository.findById(lessonId)
                 .orElseThrow(() -> new CustomException(ErrorCode.LESSON_NOT_FOUND));
@@ -88,8 +92,10 @@ public class TypingLessonService {
 
     // 레슨 삭제 (관리자)
     @Transactional
-    public void deleteLesson(Long lessonId, HttpSession session) {
-        User user = getAuthenticatedUser(session);
+    public void deleteLesson(Long lessonId, CustomUserDetails customUserDetails) {
+        if(!customUserDetails.user().isAdmin()){
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
 
         TypingLesson lesson = typingLessonRepository.findById(lessonId)
                 .orElseThrow(() -> new CustomException(ErrorCode.LESSON_NOT_FOUND));

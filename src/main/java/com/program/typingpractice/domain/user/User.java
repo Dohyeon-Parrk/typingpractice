@@ -47,4 +47,8 @@ public class User {
 				.map(Enum::name)
 				.collect(Collectors.toSet());
 	}
+
+	public boolean isAdmin() {
+		return roles.contains(Role.ROLE_ADMIN);
+	}
 }

@@ -1,14 +1,19 @@
 package com.program.typingpractice.config;
 
 import com.program.typingpractice.service.oauth.CustomOAuth2UserService;
+import com.program.typingpractice.service.user.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,6 +30,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final CustomUserDetailsService customUserDetailsService;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
         http
@@ -40,11 +47,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/lessons").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/lessons/*").authenticated()
-                        .requestMatchers(HttpMethod.POST,"/api/lessons/*").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT,"/api/lessons/*").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/lessons/*").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/lessons/*").authenticated()
+                        .requestMatchers("/api/lessons/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
+                )
+                .securityContext(securityContext -> securityContext
+                        .requireExplicitSave(true)
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exception -> exception
@@ -62,8 +70,8 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                 )
                 .sessionManagement(session -> session
-                        .sessionFixation().newSession()
-//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation().migrateSession()
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(1)
                         .expiredUrl("/login?expired=true")
                 )
@@ -106,7 +114,21 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        config.addExposedHeader("Set-Cookie");
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(customUserDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 }

@@ -1,8 +1,6 @@
 package com.program.typingpractice.service.user;
 
 import com.program.typingpractice.domain.user.User;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,17 +8,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-@Getter
-@RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
-
-	private final User user;
+public record CustomUserDetails(User user) implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return user.getRoles().stream()
-			.map(role -> new SimpleGrantedAuthority(role.name()))
-			.collect(Collectors.toSet());
+				.map(role -> new SimpleGrantedAuthority(role.name()))
+				.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -30,7 +24,7 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public String getUsername() {
-		return user.getUsername();
+		return user.getEmail();
 	}
 
 	@Override
@@ -51,5 +45,9 @@ public class CustomUserDetails implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return true;
+	}
+
+	public User getUser(){
+		return this.user;
 	}
 }
