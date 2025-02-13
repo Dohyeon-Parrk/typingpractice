@@ -1,5 +1,6 @@
 package com.program.typingpractice.service.oauth;
 
+import com.program.typingpractice.domain.user.Role;
 import com.program.typingpractice.domain.user.User;
 import com.program.typingpractice.repository.user.UserRepository;
 import jakarta.servlet.http.HttpSession;
@@ -44,7 +45,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     .email(email)
                     .username(name)
                     .password(null)
-                    .roles(Set.of("USER"))
+                    .roles(Set.of(Role.valueOf("USER")))
                     .build();
             userRepository.save(user);
         } else {

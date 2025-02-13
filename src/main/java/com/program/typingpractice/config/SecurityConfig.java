@@ -2,17 +2,16 @@ package com.program.typingpractice.config;
 
 import com.program.typingpractice.service.oauth.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -41,8 +40,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/lessons").permitAll()
-                        .requestMatchers("/api/lessons/{lessonId}").authenticated()
-                        .requestMatchers("/api/lessons/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/lessons/*").authenticated()
+                        .requestMatchers(HttpMethod.POST,"/api/lessons/*").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/api/lessons/*").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/lessons/*").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -50,7 +51,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"message\": \"로그인이 필요합니다.\"}");
+                            response.getWriter().write("{\"error\": \"Unauthorized access\"}");
                         })
                 )   // 인증되지 않은 사용자는 401 에러 반환
                 .oauth2Login(oauth2 -> oauth2
@@ -62,7 +63,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session
                         .sessionFixation().newSession()
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .maximumSessions(1)
                         .expiredUrl("/login?expired=true")
                 )

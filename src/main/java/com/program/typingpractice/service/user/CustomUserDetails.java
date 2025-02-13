@@ -1,16 +1,14 @@
 package com.program.typingpractice.service.user;
 
 import com.program.typingpractice.domain.user.User;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
@@ -21,7 +19,7 @@ public class CustomUserDetails implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return user.getRoles().stream()
-			.map(SimpleGrantedAuthority::new)
+			.map(role -> new SimpleGrantedAuthority(role.name()))
 			.collect(Collectors.toSet());
 	}
 
