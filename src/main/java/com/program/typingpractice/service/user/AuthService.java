@@ -1,5 +1,6 @@
 package com.program.typingpractice.service.user;
 
+import com.program.typingpractice.domain.user.Role;
 import com.program.typingpractice.domain.user.User;
 import com.program.typingpractice.dto.user.request.LoginRequestDto;
 import com.program.typingpractice.dto.user.request.RegisterAdminRequestDto;
@@ -56,7 +57,7 @@ public class AuthService {
                 .email(requestDto.getEmail())
                 .username(requestDto.getUsername())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
-                .roles(Set.of("USER"))
+                .roles(Set.of(Role.ROLE_USER))
                 .build();
 
         userRepository.save(user);
@@ -96,7 +97,7 @@ public class AuthService {
                 .email(requestDto.getEmail())
                 .username(requestDto.getUsername())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
-                .roles(Set.of("ADMIN"))
+                .roles(Set.of(Role.ROLE_ADMIN))
                 .build();
 
         userRepository.save(admin);

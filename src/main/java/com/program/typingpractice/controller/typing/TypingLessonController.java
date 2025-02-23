@@ -1,0 +1,76 @@
+package com.program.typingpractice.controller.typing;
+
+import com.program.typingpractice.dto.typing.request.TypingLessonRequestDto;
+import com.program.typingpractice.dto.typing.response.TypingLessonResponseDto;
+import com.program.typingpractice.service.typing.TypingLessonService;
+import com.program.typingpractice.service.user.CustomUserDetails;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/lessons")
+public class TypingLessonController {
+
+    private final TypingLessonService typingLessonService;
+
+    // 레슨 목록 조회 ( 모든 사용자 -> 로그인 없이 조회 가능 )
+    @GetMapping
+    public ResponseEntity<TypingLessonResponseDto> getLessons(
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) String difficulty){
+        TypingLessonResponseDto responseDto = typingLessonService.getLessons(language, difficulty);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseDto);
+    }
+
+    // 단건 조회 ( 일반 유저 )
+    @GetMapping("/{lessonId}")
+    public ResponseEntity<TypingLessonResponseDto> getLessonById(
+            @PathVariable Long lessonId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails){
+        TypingLessonResponseDto responseDto = typingLessonService.getLessonById(lessonId, customUserDetails);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseDto);
+    }
+
+    // 레슨 추가 (관리자)
+    @PostMapping
+    public ResponseEntity<TypingLessonResponseDto> createLesson(
+            @Valid @RequestBody TypingLessonRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        TypingLessonResponseDto responseDto = typingLessonService.createLesson(requestDto, customUserDetails);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(responseDto);
+    }
+
+    // 레슨 수정 (관리자)
+    @PutMapping("/{lessonId}")
+    public ResponseEntity<TypingLessonResponseDto> updateLesson(
+            @PathVariable Long lessonId,
+            @Valid @RequestBody TypingLessonRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        TypingLessonResponseDto responseDto = typingLessonService.updateLesson(lessonId, requestDto, customUserDetails);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseDto);
+    }
+
+    // 레슨 삭제 (관리자)
+    @DeleteMapping("/{lessonId}")
+    public ResponseEntity<TypingLessonResponseDto> deleteLesson(@PathVariable Long lessonId,
+                                                                @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        typingLessonService.deleteLesson(lessonId, customUserDetails);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+}
